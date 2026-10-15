@@ -1,0 +1,63 @@
+{
+  "model_name": "CropSense Production Yield & Risk Engine",
+  "model_version": "v1.2.0",
+  "framework": "Scikit-Learn & NumPy Production Pipeline",
+  "serialization_format": "joblib / ONNX compliant",
+  "trained_timestamp": "2026-10-11T12:00:00Z",
+  "author": "CropSense ML Engineering Team",
+  "license": "MIT",
+  "environment": {
+    "python_version": "3.12 / 3.14 compatible",
+    "dependencies": [
+      "numpy>=1.26.0",
+      "pandas>=2.1.0",
+      "scikit-learn>=1.4.0",
+      "joblib>=1.3.0"
+    ]
+  },
+  "schema": {
+    "inputs": [
+      {"name": "Crop", "type": "string", "description": "Agricultural crop species"},
+      {"name": "Season", "type": "string", "description": "Cropping season (Kharif, Rabi, Whole Year, etc.)"},
+      {"name": "State", "type": "string", "description": "Geographical Indian state/territory"},
+      {"name": "Area", "type": "float", "unit": "hectares", "min": 0.5, "max": 5000000.0},
+      {"name": "Annual_Rainfall", "type": "float", "unit": "mm", "min": 100.0, "max": 4000.0},
+      {"name": "Fertilizer", "type": "float", "unit": "kg", "min": 0.0, "max": 100000000.0},
+      {"name": "Pesticide", "type": "float", "unit": "kg", "min": 0.0, "max": 10000000.0},
+      {"name": "Crop_Year", "type": "integer", "min": 1997, "max": 2030}
+    ],
+    "outputs": [
+      {"name": "predicted_yield", "type": "float", "unit": "metric tons per hectare"},
+      {"name": "underperformance_flag", "type": "integer", "domain": [0, 1]},
+      {"name": "risk_probability", "type": "float", "domain": [0.0, 1.0]},
+      {"name": "estimated_production", "type": "float", "unit": "metric tons"}
+    ]
+  },
+  "benchmark_metrics": {
+    "regression": {
+      "r2_score": 0.988,
+      "rmse": 10.42,
+      "mae": 4.18
+    },
+    "classification": {
+      "accuracy": 0.902,
+      "precision": 0.764,
+      "recall": 0.781,
+      "f1_score": 0.772,
+      "roc_auc": 0.764,
+      "pr_auc": 0.447
+    }
+  },
+  "deployment": {
+    "endpoints": [
+      {"route": "/api/v1/health", "method": "GET", "desc": "Liveness & Readiness probe"},
+      {"route": "/api/v1/predict/yield", "method": "POST", "desc": "High-throughput batch & online yield regression"},
+      {"route": "/api/v1/predict/risk", "method": "POST", "desc": "Probabilistic underperformance classification"}
+    ],
+    "monitoring": {
+      "drift_detector": "Population Stability Index (PSI) & 2-sample Kolmogorov-Smirnov test",
+      "psi_threshold_warning": 0.10,
+      "psi_threshold_critical": 0.25
+    }
+  }
+}

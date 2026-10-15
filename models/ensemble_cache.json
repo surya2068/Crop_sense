@@ -1,0 +1,114 @@
+{
+  "target": "Yield",
+  "features": [
+    "Area",
+    "Annual_Rainfall",
+    "Fertilizer",
+    "Pesticide",
+    "Crop_Year",
+    "Crop",
+    "Season",
+    "State"
+  ],
+  "n_features": 8,
+  "train_size": 15751,
+  "test_size": 3938,
+  "models": {
+    "RandomForest": {
+      "metrics": {
+        "MAE": 61.4994,
+        "MSE": 92283.0167,
+        "RMSE": 303.7812,
+        "R2": 0.8928,
+        "Adj_R2": 0.8926
+      }
+    },
+    "DecisionTree": {
+      "metrics": {
+        "MAE": 85.0464,
+        "MSE": 100612.8681,
+        "RMSE": 317.1953,
+        "R2": 0.8832,
+        "Adj_R2": 0.8829
+      }
+    },
+    "AdaBoost": {
+      "metrics": {
+        "MAE": 71.2629,
+        "MSE": 93568.532,
+        "RMSE": 305.8897,
+        "R2": 0.8913,
+        "Adj_R2": 0.8911
+      }
+    },
+    "XGBoost": {
+      "metrics": {
+        "MAE": 56.4617,
+        "MSE": 91694.1729,
+        "RMSE": 302.8105,
+        "R2": 0.8935,
+        "Adj_R2": 0.8933
+      }
+    }
+  },
+  "plots": [
+    {
+      "file": "actual_vs_predicted_randomforest.png",
+      "title": "Actual vs Predicted \u2014 RandomForest"
+    },
+    {
+      "file": "residuals_randomforest.png",
+      "title": "Residuals \u2014 RandomForest"
+    },
+    {
+      "file": "actual_vs_predicted_decisiontree.png",
+      "title": "Actual vs Predicted \u2014 DecisionTree"
+    },
+    {
+      "file": "residuals_decisiontree.png",
+      "title": "Residuals \u2014 DecisionTree"
+    },
+    {
+      "file": "actual_vs_predicted_adaboost.png",
+      "title": "Actual vs Predicted \u2014 AdaBoost"
+    },
+    {
+      "file": "residuals_adaboost.png",
+      "title": "Residuals \u2014 AdaBoost"
+    },
+    {
+      "file": "actual_vs_predicted_xgboost.png",
+      "title": "Actual vs Predicted \u2014 XGBoost"
+    },
+    {
+      "file": "residuals_xgboost.png",
+      "title": "Residuals \u2014 XGBoost"
+    },
+    {
+      "file": "model_comparison.png",
+      "title": "Model Comparison (MAE / RMSE / R\u00b2)"
+    },
+    {
+      "file": "feature_importance.png",
+      "title": "Feature Importance \u2014 Tree Ensemble"
+    }
+  ],
+  "best_model": "XGBoost",
+  "xgboost_available": true,
+  "feature_importances": {
+    "Crop Cultivar": 0.495,
+    "Rainfall Factor": 0.175,
+    "Fertilizer Intensity": 0.118,
+    "State Geometry": 0.088,
+    "Scale (Area)": 0.052,
+    "Pesticide": 0.035,
+    "Season": 0.024,
+    "Crop Year": 0.013
+  },
+  "findings": [
+    "Top performing architecture: <strong>XGBoost</strong> achieving <strong>R\u00b2 = 0.8935</strong>, RMSE = 302.8105, MAE = 56.4617.",
+    "Gradient boosted and bagged tree ensembles effectively suppress variance and model complex multi-modal yield distributions.",
+    "<strong>Crop Cultivar</strong> remains the decisive split criterion across the forest estimators.",
+    "Evaluated on 15,751 training rows and 3,938 out-of-fold test instances."
+  ]
+}

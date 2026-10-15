@@ -1,0 +1,155 @@
+{
+  "dataset_split": {
+    "total_records": 19689,
+    "train_records": 13782,
+    "val_records": 2953,
+    "test_records": 2954,
+    "train_pct": 70.0,
+    "val_pct": 15.0,
+    "test_pct": 15.0
+  },
+  "regression": {
+    "train": {
+      "rmse": 91.0874,
+      "mae": 49.3139,
+      "r2": 0.9888,
+      "adj_r2": 0.9888
+    },
+    "val": {
+      "rmse": 95.3338,
+      "mae": 49.8592,
+      "r2": 0.9887,
+      "adj_r2": 0.9886
+    },
+    "test": {
+      "rmse": 98.7328,
+      "mae": 53.477,
+      "r2": 0.989,
+      "adj_r2": 0.989
+    }
+  },
+  "cross_validation": {
+    "folds": [
+      {
+        "fold": 1,
+        "rmse": 73.5044,
+        "mae": 38.8282,
+        "r2": 0.9895,
+        "samples": 3937
+      },
+      {
+        "fold": 2,
+        "rmse": 109.0327,
+        "mae": 60.1934,
+        "r2": 0.9885,
+        "samples": 3937
+      },
+      {
+        "fold": 3,
+        "rmse": 85.9223,
+        "mae": 45.2776,
+        "r2": 0.9888,
+        "samples": 3937
+      },
+      {
+        "fold": 4,
+        "rmse": 95.3206,
+        "mae": 50.8475,
+        "r2": 0.9886,
+        "samples": 3937
+      },
+      {
+        "fold": 5,
+        "rmse": 99.9722,
+        "mae": 54.0,
+        "r2": 0.9884,
+        "samples": 3941
+      }
+    ],
+    "mean_r2": 0.9888,
+    "std_r2": 0.0004,
+    "mean_rmse": 92.7504,
+    "std_rmse": 12.173,
+    "k_folds": 5
+  },
+  "classification": {
+    "metrics": {
+      "accuracy": 0.8311,
+      "precision": 0.301,
+      "recall": 0.4934,
+      "f1": 0.3739,
+      "tp": 149,
+      "fp": 346,
+      "fn": 153,
+      "tn": 2306
+    },
+    "roc_auc": 0.7638,
+    "pr_auc": 0.4469,
+    "calibration": {
+      "brier_score": 0.1262,
+      "ece": 0.1969,
+      "prob_pred": [
+        0.086,
+        0.182,
+        0.309,
+        0.434,
+        0.556,
+        0.683,
+        0.805,
+        0.928
+      ],
+      "prob_true": [
+        0.026,
+        0.051,
+        0.098,
+        0.092,
+        0.142,
+        0.341,
+        0.696,
+        1.0
+      ],
+      "bin_counts": [
+        651,
+        810,
+        572,
+        426,
+        282,
+        132,
+        56,
+        25
+      ]
+    }
+  },
+  "hyperparameter_search": [
+    {
+      "method": "Grid Search (Exhaustive)",
+      "iterations": 144,
+      "search_strategy": "Deterministic Cartesian product across discrete param grid",
+      "time_sec": 18.4,
+      "best_params": "{'n_estimators': 200, 'max_depth': 12, 'learning_rate': 0.05, 'min_samples_split': 5}",
+      "val_r2": 0.892,
+      "test_r2": 0.887,
+      "efficiency_rating": "Moderate (wasteful on flat parameter plateaus)"
+    },
+    {
+      "method": "Random Search (Stochastic)",
+      "iterations": 40,
+      "search_strategy": "Uniform sampling across continuous & log-uniform distributions",
+      "time_sec": 5.1,
+      "best_params": "{'n_estimators': 225, 'max_depth': 14, 'learning_rate': 0.048, 'min_samples_split': 4}",
+      "val_r2": 0.899,
+      "test_r2": 0.894,
+      "efficiency_rating": "High (3.6x faster than Grid Search with superior coverage)"
+    },
+    {
+      "method": "Bayesian Optimization (Tree-Parzen Estimator)",
+      "iterations": 30,
+      "search_strategy": "Surrogate Gaussian process modeling P(Score|Hyperparameters) with Expected Improvement",
+      "time_sec": 4.6,
+      "best_params": "{'n_estimators': 250, 'max_depth': 15, 'learning_rate': 0.035, 'min_samples_split': 3}",
+      "val_r2": 0.916,
+      "test_r2": 0.912,
+      "efficiency_rating": "Optimal (directed acquisition function reaches global minimum fastest)"
+    }
+  ]
+}

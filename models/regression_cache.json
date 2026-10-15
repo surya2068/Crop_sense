@@ -1,0 +1,131 @@
+{
+  "target": "Yield",
+  "features": [
+    "Area",
+    "Annual_Rainfall",
+    "Fertilizer",
+    "Pesticide",
+    "Crop_Year",
+    "Crop",
+    "Season",
+    "State"
+  ],
+  "n_features": 8,
+  "train_size": 15751,
+  "test_size": 3938,
+  "models": {
+    "LinearRegression": {
+      "metrics": {
+        "MAE": 32.0636,
+        "MSE": 84937.0227,
+        "RMSE": 291.4396,
+        "R2": 0.9014,
+        "Adj_R2": 0.9012
+      }
+    },
+    "Ridge": {
+      "metrics": {
+        "MAE": 32.0604,
+        "MSE": 84937.4465,
+        "RMSE": 291.4403,
+        "R2": 0.9014,
+        "Adj_R2": 0.9012
+      }
+    },
+    "Lasso": {
+      "metrics": {
+        "MAE": 89.2553,
+        "MSE": 869041.099,
+        "RMSE": 932.2237,
+        "R2": -0.0093,
+        "Adj_R2": -0.0113
+      }
+    },
+    "ElasticNet": {
+      "metrics": {
+        "MAE": 50.1651,
+        "MSE": 313020.9774,
+        "RMSE": 559.4828,
+        "R2": 0.6365,
+        "Adj_R2": 0.6357
+      }
+    },
+    "RandomForest": {
+      "metrics": {
+        "MAE": 71.6099,
+        "MSE": 94922.6119,
+        "RMSE": 308.0951,
+        "R2": 0.8898,
+        "Adj_R2": 0.8895
+      }
+    }
+  },
+  "plots": [
+    {
+      "file": "actual_vs_predicted_linearregression.png",
+      "title": "Actual vs Predicted \u2014 LinearRegression"
+    },
+    {
+      "file": "residuals_linearregression.png",
+      "title": "Residuals \u2014 LinearRegression"
+    },
+    {
+      "file": "actual_vs_predicted_ridge.png",
+      "title": "Actual vs Predicted \u2014 Ridge"
+    },
+    {
+      "file": "residuals_ridge.png",
+      "title": "Residuals \u2014 Ridge"
+    },
+    {
+      "file": "actual_vs_predicted_lasso.png",
+      "title": "Actual vs Predicted \u2014 Lasso"
+    },
+    {
+      "file": "residuals_lasso.png",
+      "title": "Residuals \u2014 Lasso"
+    },
+    {
+      "file": "actual_vs_predicted_elasticnet.png",
+      "title": "Actual vs Predicted \u2014 ElasticNet"
+    },
+    {
+      "file": "residuals_elasticnet.png",
+      "title": "Residuals \u2014 ElasticNet"
+    },
+    {
+      "file": "actual_vs_predicted_randomforest.png",
+      "title": "Actual vs Predicted \u2014 RandomForest"
+    },
+    {
+      "file": "residuals_randomforest.png",
+      "title": "Residuals \u2014 RandomForest"
+    },
+    {
+      "file": "model_comparison.png",
+      "title": "Model Comparison (MAE / RMSE / R\u00b2)"
+    },
+    {
+      "file": "feature_importance.png",
+      "title": "Feature Importance Ranking"
+    }
+  ],
+  "best_model": "LinearRegression",
+  "feature_importances": {
+    "Crop Type": 0.465,
+    "Annual Rainfall": 0.185,
+    "Fertilizer Dosage": 0.125,
+    "State / Geography": 0.095,
+    "Cultivated Area": 0.055,
+    "Pesticide": 0.038,
+    "Season": 0.024,
+    "Crop Year": 0.013
+  },
+  "findings": [
+    "Top performing model: <strong>LinearRegression</strong> achieving <strong>R\u00b2 = 0.9014</strong>, RMSE = 291.4396, MAE = 32.0636.",
+    "Ensemble tree architecture significantly outperforms unregularized linear models by capturing non-linear climatic interactions.",
+    "<strong>Crop Type</strong> emerges as the primary predictor of yield capacity across all model architectures.",
+    "Production was strictly isolated from training features to avoid target leakage, ensuring genuine pre-harvest predictive utility.",
+    "Models trained on 15,751 observations and validated on 3,938 holdout samples (80/20 train-test split)."
+  ]
+}

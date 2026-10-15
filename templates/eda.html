@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Exploratory Data Analysis{% endblock %}
+{% block content %}
+<h1>Exploratory Data Analysis</h1>
+<p>Comprehensive statistical breakdown, outlier detection, correlations, and distribution plots for <strong>{{ dataset_name }}</strong>.</p>
+
+{% if error %}
+<div class="alert"><strong>Error loading EDA:</strong> {{ error }}</div>
+{% else %}
+
+<section class="section">
+  <h2>1. Dataset Overview</h2>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="stat-value">{{ "{:,}".format(info.n_rows) }}</span><span class="stat-label">Total Observations</span></div>
+    <div class="stat-card"><span class="stat-value">{{ info.n_cols }}</span><span class="stat-label">Features</span></div>
+    <div class="stat-card"><span class="stat-value">{{ info.memory_kb }} KB</span><span class="stat-label">Memory Footprint</span></div>
+    <div class="stat-card"><span class="stat-value">{{ duplicates }}</span><span class="stat-label">Duplicate Rows</span></div>
+    <div class="stat-card"><span class="stat-value">{{ missing_total }}</span><span class="stat-label">Missing Values</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>2. Descriptive Statistics (Numeric Features)</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Column</th><th>Count</th><th>Mean</th><th>Std</th><th>Min</th><th>25%</th><th>Median</th><th>75%</th><th>Max</th><th>Variance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in stats %}
+        <tr>
+          <td><strong>{{ row.column }}</strong></td>
+          <td>{{ "{:,.0f}".format(row.count) }}</td>
+          <td>{{ row.mean }}</td>
+          <td>{{ row.std }}</td>
+          <td>{{ row.min }}</td>
+          <td>{{ row["25%"] }}</td>
+          <td>{{ row.median }}</td>
+          <td>{{ row["75%"] }}</td>
+          <td>{{ row.max }}</td>
+          <td>{{ row.variance }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>3. Outlier Analysis (1.5 × IQR Rule)</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Feature</th><th>Q1 (25%)</th><th>Q3 (75%)</th><th>IQR</th><th>Lower Bound</th><th>Upper Bound</th><th>Outlier Count</th><th>Outlier %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in outliers %}
+        <tr>
+          <td><strong>{{ o.column }}</strong></td>
+          <td>{{ o.q25 }}</td>
+          <td>{{ o.q75 }}</td>
+          <td>{{ o.iqr }}</td>
+          <td>{{ o.lower_bound }}</td>
+          <td>{{ o.upper_bound }}</td>
+          <td>{{ "{:,}".format(o.outlier_count) }}</td>
+          <td><span class="badge badge-risk">{{ o.outlier_percent }}%</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>4. Categorical Breakdown (Top Frequencies)</h2>
+  <div class="summary-grid">
+    {% for cat in cat_frequencies %}
+    <div class="summary-box">
+      <h3>{{ cat.column }}</h3>
+      <table class="mini-table">
+        <tr><th>Value</th><th>Occurrences</th></tr>
+        {% for v in cat.top_values %}
+        <tr><td>{{ v.value }}</td><td>{{ "{:,}".format(v.count) }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <h2>5. Target Analysis (Yield)</h2>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="stat-value">{{ target.stats.mean }}</span><span class="stat-label">Mean Yield (t/ha)</span></div>
+    <div class="stat-card"><span class="stat-value">{{ target.stats.median }}</span><span class="stat-label">Median Yield (t/ha)</span></div>
+    <div class="stat-card"><span class="stat-value">{{ target.stats.std }}</span><span class="stat-label">Std Deviation</span></div>
+    <div class="stat-card"><span class="stat-value">{{ target.stats.max }}</span><span class="stat-label">Max Realized Yield</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>6. Data Visualizations</h2>
+  <div class="chart-grid">
+    {% for p in plots %}
+    <div class="chart-card">
+      <h4>{{ p.title }}</h4>
+      <img src="{{ url_for('static', filename='plots/' + p.file) }}" alt="{{ p.title }}">
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <h2>7. Key Findings &amp; Insights</h2>
+  <ul class="findings-list">
+    {% for f in findings %}
+    <li>{{ f|safe }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endif %}
+{% endblock %}

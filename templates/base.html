@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CropSense{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="nav">
+  <div class="brand">🌱 CropSense</div>
+  <nav>
+    <a href="{{ url_for('index') }}">Dashboard</a>
+    <a href="{{ url_for('data_page') }}">Data</a>
+    <a href="{{ url_for('eda_page') }}">EDA</a>
+    <a href="{{ url_for('regression_page') }}">Regression</a>
+    <a href="{{ url_for('ensemble_page') }}">Ensemble</a>
+    <a href="{{ url_for('unsupervised_page') }}">Unsupervised (CO4)</a>
+    <a href="{{ url_for('evaluation_page') }}">Evaluation (CO5)</a>
+    <a href="{{ url_for('predict_page') }}">Predict</a>
+  </nav>
+</header>
+<main class="container">{% block content %}{% endblock %}</main>
+<footer>CropSense · Agricultural Crop Yield + Exploratory Data Analysis + ML Prediction</footer>
+</body>
+</html>

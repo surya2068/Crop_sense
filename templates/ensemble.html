@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Ensemble Models{% endblock %}
+{% block content %}
+<h1>Ensemble Models — Predict Crop Yield</h1>
+<p>Compare bagging and boosting ensemble architectures for crop yield prediction on <strong>{{ dataset_name }}</strong>.</p>
+
+{% if error %}
+<div class="alert"><strong>Could not run ensemble models:</strong> {{ error }}</div>
+{% else %}
+
+<section class="section">
+  <h2>1. Dataset Overview</h2>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="stat-value">{{ target }}</span><span class="stat-label">Target Variable</span></div>
+    <div class="stat-card"><span class="stat-value">{{ n_features }}</span><span class="stat-label">Features</span></div>
+    <div class="stat-card"><span class="stat-value">{{ train_size + test_size }}</span><span class="stat-label">Observations</span></div>
+    <div class="stat-card"><span class="stat-value">{{ best_model }}</span><span class="stat-label">Top Model</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>2. Ensemble Architecture Comparison</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Model</th><th>MAE</th><th>MSE</th><th>RMSE</th><th>R²</th><th>Adjusted R²</th></tr>
+      </thead>
+      <tbody>
+        {% for name, m in models.items() %}
+        <tr {% if name == best_model %}style="background: #eef6f0; font-weight: bold;"{% endif %}>
+          <td>{{ name }} {% if name == best_model %}<span class="badge badge-optimal">BEST</span>{% endif %}</td>
+          <td>{{ m.metrics.MAE }}</td>
+          <td>{{ m.metrics.MSE }}</td>
+          <td>{{ m.metrics.RMSE }}</td>
+          <td>{{ m.metrics.R2 }}</td>
+          <td>{{ m.metrics.Adj_R2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>3. Ensemble Visualizations</h2>
+  <div class="chart-grid">
+    {% for p in plots %}
+    <div class="chart-card">
+      <h4>{{ p.title }}</h4>
+      <img src="{{ url_for('static', filename='ensemble_plots/' + p.file) }}" alt="{{ p.title }}">
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <h2>4. Key Findings</h2>
+  <ul class="findings-list">
+    {% for finding in findings %}
+    <li>{{ finding | safe }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="section">
+  <h2>5. Instant Ensemble Prediction</h2>
+  <p>Run live inference using the top ensemble model ({{ best_model }}).</p>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <form id="ens-form" onsubmit="return false;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size:12px; font-weight:700;">Crop</label>
+            <select id="ens_crop" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for c in crops %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">State</label>
+            <select id="ens_state" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Season</label>
+            <select id="ens_season" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for se in seasons %}<option value="{{ se }}">{{ se }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Area (hectares)</label>
+            <input type="number" id="ens_area" value="5000" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Rainfall (mm)</label>
+            <input type="number" id="ens_rainfall" value="1200" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Fertilizer (kg)</label>
+            <input type="number" id="ens_fertilizer" value="450000" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Pesticide (kg)</label>
+            <input type="number" id="ens_pesticide" value="1500" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+        </div>
+        <button type="button" class="btn-predict" id="ens-btn" onclick="predictEns()" style="margin-top:16px;">Predict Ensemble Yield</button>
+      </form>
+    </div>
+    <div class="summary-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <span style="font-size:14px; color:var(--text-muted); font-weight:600;">Predicted Ensemble Yield</span>
+      <div id="ens-result" style="font-size:36px; font-weight:800; color:var(--primary); margin:8px 0;">—</div>
+      <span style="font-size:12px; color:var(--text-muted);">Metric Tons per Hectare (t/ha)</span>
+      <p id="ens-error" style="color:red; display:none; margin-top:8px; font-size:12px;"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+async function predictEns() {
+  const btn = document.getElementById('ens-btn');
+  const res = document.getElementById('ens-result');
+  const err = document.getElementById('ens-error');
+  btn.disabled = true;
+  btn.textContent = 'Calculating...';
+  err.style.display = 'none';
+
+  const payload = {
+    crop: document.getElementById('ens_crop').value,
+    state: document.getElementById('ens_state').value,
+    season: document.getElementById('ens_season').value,
+    area: parseFloat(document.getElementById('ens_area').value),
+    annual_rainfall: parseFloat(document.getElementById('ens_rainfall').value),
+    fertilizer: parseFloat(document.getElementById('ens_fertilizer').value),
+    pesticide: parseFloat(document.getElementById('ens_pesticide').value),
+  };
+
+  try {
+    const resp = await fetch('/predict_ensemble', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      res.textContent = data.prediction.toFixed(4) + ' t/ha';
+    } else {
+      err.textContent = data.message || 'Prediction failed';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Network error: ' + e.message;
+    err.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Predict Ensemble Yield';
+}
+</script>
+
+{% endif %}
+{% endblock %}

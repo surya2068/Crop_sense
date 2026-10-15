@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Unsupervised Learning (CO4){% endblock %}
+{% block content %}
+<section class="hero" style="background: linear-gradient(135deg, #e0f2fe, #f0fdf4); border-color: #bae6fd;">
+  <div>
+    <p class="eyebrow" style="color: #0369a1;">COURSE OUTCOME 4 (CO4) — UNSUPERVISED MACHINE LEARNING</p>
+    <h1 style="color: #0c4a6e;">Unsupervised Learning &amp; Anomaly Detection</h1>
+    <p style="color: #1e3a5f;">Discovering hidden agronomic structures, natural crop taxonomies, and localized production anomalies in unlabelled agricultural data using K-Means, Hierarchical Clustering, DBSCAN, PCA, and t-SNE.</p>
+  </div>
+  <div class="sprout">🔍</div>
+</section>
+
+{% if error %}
+<div class="alert"><strong>Could not run unsupervised analysis:</strong> {{ error }}</div>
+{% else %}
+
+<!-- ===================== 1. Overview ===================== -->
+<section class="section">
+  <h2>1. CO4 Syllabus &amp; Algorithm Mapping</h2>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="stat-value">PCA &amp; t-SNE</span><span class="stat-label">Dimensionality Reduction</span></div>
+    <div class="stat-card"><span class="stat-value">k = {{ optimal_k }}</span><span class="stat-label">Optimal K-Means Clusters</span></div>
+    <div class="stat-card"><span class="stat-value">Ward Linkage</span><span class="stat-label">Hierarchical Dendrogram</span></div>
+    <div class="stat-card"><span class="stat-value">{{ dbscan_noise_pct }}%</span><span class="stat-label">DBSCAN Noise Outliers</span></div>
+    <div class="stat-card"><span class="stat-value">{{ anomalies_detected }}</span><span class="stat-label">Unsupervised Anomalies</span></div>
+  </div>
+  <p class="hint">Unsupervised models uncover patterns across multi-dimensional agricultural features: <strong>Annual Rainfall, Fertilizer per Hectare, Pesticide per Hectare, Cultivated Area, and Realized Yield</strong> without requiring supervision or ground-truth class labels.</p>
+</section>
+
+<!-- ===================== 2. Dimensionality Reduction (PCA & t-SNE) ===================== -->
+<section class="section">
+  <h2>2. Dimensionality Reduction — PCA &amp; t-SNE Manifold</h2>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <h3>Principal Component Analysis (PCA)</h3>
+      <p>High-dimensional agricultural spaces are projected onto orthogonal axes of maximum variance via covariance matrix eigen-decomposition:</p>
+      <ul>
+        <li><strong>PC1 (First Principal Component)</strong>: Explains <strong>{{ pc1_var }}</strong> of variance, primarily capturing overall agricultural input intensity (fertilizer &amp; pesticide usage).</li>
+        <li><strong>PC2 (Second Principal Component)</strong>: Explains <strong>{{ pc2_var }}</strong> of variance, separating rainfed low-yield crops from high-biomass plantation systems.</li>
+        <li><strong>Cumulative Variance</strong>: PC1 + PC2 capture <strong>{{ cum_var }}</strong> of total dataset information.</li>
+      </ul>
+    </div>
+    <div class="summary-box">
+      <h3>t-SNE Non-Linear Manifold</h3>
+      <p>t-Distributed Stochastic Neighbor Embedding minimizes Kullback-Leibler divergence between joint probabilities in high-dimensional and low-dimensional space, preserving localized neighborhood structures among crop clusters.</p>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h4>PCA Scree Plot (Eigenvalue Explained Variance)</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/pca_scree_plot.png') }}" alt="PCA Scree Plot">
+    </div>
+    <div class="chart-card">
+      <h4>2D PCA Projection (Colored by K-Means Clusters)</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/pca_2d_clusters.png') }}" alt="2D PCA Clusters">
+    </div>
+    <div class="chart-card">
+      <h4>t-SNE Non-Linear Manifold Projection</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/tsne_projection.png') }}" alt="t-SNE Projection">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. K-Means Clustering ===================== -->
+<section class="section">
+  <h2>3. Partitional Clustering — K-Means with Elbow Analysis</h2>
+  <p>The optimal number of agricultural clusters is established by evaluating the inflection point of the within-cluster sum of squares (Inertia):</p>
+  
+  <div class="chart-grid" style="grid-template-columns: 1fr; max-width: 720px; margin: 16px auto;">
+    <div class="chart-card">
+      <h4>K-Means Elbow Method (Inertia vs. k)</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/kmeans_elbow_analysis.png') }}" alt="K-Means Elbow Method">
+    </div>
+  </div>
+
+  <h3>Discovered Agricultural Cluster Profiles (k = 4)</h3>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cluster</th>
+          <th>Agronomic Profile</th>
+          <th>Sample Share</th>
+          <th>Mean Rainfall</th>
+          <th>Mean Fertilizer</th>
+          <th>Mean Yield</th>
+          <th>Representative Crops</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cl in cluster_profiles %}
+        <tr>
+          <td><span class="badge" style="background:#0284c7; color:white;">Cluster {{ cl.cluster_id }}</span></td>
+          <td><strong>{{ cl.name }}</strong></td>
+          <td>{{ cl.share }} ({{ cl.count }} obs)</td>
+          <td>{{ cl.mean_rainfall }}</td>
+          <td>{{ cl.mean_fertilizer }}</td>
+          <td><strong>{{ cl.mean_yield }}</strong></td>
+          <td>{{ cl.sample_crops }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== 4. Hierarchical Clustering ===================== -->
+<section class="section">
+  <h2>4. Hierarchical Agglomerative Clustering (Dendrogram)</h2>
+  <p>Bottom-up agglomerative clustering groups agricultural profiles iteratively using <strong>Ward's minimum variance criterion</strong>, minimizing total within-cluster variance at each merge step:</p>
+  
+  <div class="chart-grid" style="grid-template-columns: 1fr; margin-top: 16px;">
+    <div class="chart-card">
+      <h4>Crop Hierarchical Taxonomy Dendrogram (Ward Linkage)</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/hierarchical_dendrogram.png') }}" alt="Hierarchical Clustering Dendrogram">
+    </div>
+  </div>
+  <p class="hint">The horizontal distance indicates dissimilarity between crop families, demonstrating that high-biomass crops (Coconut, Sugarcane) bifurcate early from cereal and pulse families.</p>
+</section>
+
+<!-- ===================== 5. DBSCAN Density Clustering ===================== -->
+<section class="section">
+  <h2>5. Density-Based Clustering — DBSCAN &amp; Noise Isolation</h2>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <h3>DBSCAN Mechanics (&epsilon; = 1.1, MinPts = 6)</h3>
+      <ul>
+        <li><strong>Core Samples</strong>: Points residing in high-density multi-dimensional regions having &ge; 6 neighbors within radius &epsilon;.</li>
+        <li><strong>Border Samples</strong>: Points reachable from core samples but having lower density.</li>
+        <li><strong>Noise Points (Outliers)</strong>: Isolated observations located in sparse feature regions flagged as potential anomalies (<strong>{{ dbscan_noise_pct }}%</strong> of data).</li>
+      </ul>
+    </div>
+    <div class="summary-box">
+      <h3>DBSCAN Visual Projection</h3>
+      <div class="chart-card" style="box-shadow: none; padding: 0; border: none;">
+        <img src="{{ url_for('static', filename='unsupervised_plots/dbscan_clustering.png') }}" alt="DBSCAN Clustering">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6. Unsupervised Anomaly Detection ===================== -->
+<section class="section">
+  <h2>6. Unsupervised Anomaly Detection</h2>
+  <p>Anomaly detection is performed without ground-truth labels by computing the <strong>PCA reconstruction error</strong> for each observation:
+  $$	ext{Score}(x) = \|x - \hat{x}_{	ext{PCA}}\|^2$$
+  Observations that deviate sharply from normal agricultural correlations (e.g. catastrophic harvest collapse during favorable rainfall) yield high reconstruction error and are isolated as multi-dimensional anomalies.</p>
+
+  <div class="chart-grid" style="grid-template-columns: 1fr; max-width: 720px; margin: 16px auto;">
+    <div class="chart-card">
+      <h4>Unsupervised Anomaly Score Distribution (Top 5% Threshold)</h4>
+      <img src="{{ url_for('static', filename='unsupervised_plots/unsupervised_anomalies.png') }}" alt="Anomaly Score Distribution">
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 7. Key Findings ===================== -->
+<section class="section">
+  <h2>7. Key Academic Findings &amp; Course Outcome Insights</h2>
+  <ul class="findings-list">
+    {% for f in findings %}
+    <li>{{ f|safe }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endif %}
+{% endblock %}

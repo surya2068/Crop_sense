@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Dataset Preview{% endblock %}
+{% block content %}
+<h1>Processed Crop Dataset Preview</h1>
+<p>Preview of the cleaned agricultural dataset with derived agronomic features (displaying first 12 records of <strong>{{ "{:,}".format(rows) }}</strong> rows).</p>
+
+<div class="cards" style="margin-bottom: 24px;">
+  <div class="card"><span>Total Rows</span><strong>{{ "{:,}".format(rows) }}</strong></div>
+  <div class="card"><span>Total Columns</span><strong>{{ columns_count }}</strong></div>
+  <div class="card"><span>Primary Target</span><strong>Yield (t/ha)</strong></div>
+  <div class="card"><span>Derived Flag</span><strong>UNDERPERFORMANCE_FLAG</strong></div>
+</div>
+
+<div class="panel">
+  <h2>Available Columns &amp; Data Types</h2>
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+    {% for col in columns %}
+    <span class="badge">{{ col }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Dataset Records Preview</h2>
+  <div class="table-wrap">
+    {{ preview|safe }}
+  </div>
+</div>
+{% endblock %}

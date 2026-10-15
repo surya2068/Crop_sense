@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Supervised Regression{% endblock %}
+{% block content %}
+<h1>Supervised Regression — Predict Crop Yield</h1>
+<p>Target variable: <strong>Yield</strong> (output per unit land area). Trained on <strong>{{ train_size + test_size }}</strong> samples from <strong>{{ dataset_name }}</strong>.</p>
+
+{% if error %}
+<div class="alert"><strong>Could not run regression:</strong> {{ error }}</div>
+{% else %}
+
+<section class="section">
+  <h2>1. Dataset Overview</h2>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="stat-value">{{ target }}</span><span class="stat-label">Target Variable</span></div>
+    <div class="stat-card"><span class="stat-value">{{ n_features }}</span><span class="stat-label">Predictors</span></div>
+    <div class="stat-card"><span class="stat-value">{{ train_size + test_size }}</span><span class="stat-label">Total Observations</span></div>
+    <div class="stat-card"><span class="stat-value">{{ best_model }}</span><span class="stat-label">Top Performing Model</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>2. Feature Selection &amp; Leakage Prevention</h2>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <h3>Included Features</h3>
+      <ul>
+        <li><strong>Crop</strong> — Primary determinant of biological yield potential (e.g. cereals vs plantation).</li>
+        <li><strong>Season</strong> — Captures photoperiod and weather differences (Kharif, Rabi, Summer, Winter).</li>
+        <li><strong>State</strong> — Geospatial proxy for regional soil quality and agronomic practices.</li>
+        <li><strong>Area</strong> — Scale of cultivation (hectares).</li>
+        <li><strong>Annual_Rainfall</strong> — Moisture availability throughout the crop calendar.</li>
+        <li><strong>Fertilizer &amp; Pesticide</strong> — Chemical nutrient and crop protection inputs.</li>
+      </ul>
+    </div>
+    <div class="summary-box">
+      <h3>Excluded Features (Leakage Avoidance)</h3>
+      <ul>
+        <li><strong>Production</strong> — <code>Yield = Production / Area</code>. Including Production would leak the target directly and prevent pre-harvest forecasting.</li>
+        <li><strong>Crop_Median_Yield</strong> — Derived directly from historical target distributions.</li>
+        <li><strong>UNDERPERFORMANCE_FLAG</strong> — Operational anomaly label computed from yield.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>3. Model Performance Comparison</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Model</th><th>MAE</th><th>MSE</th><th>RMSE</th><th>R²</th><th>Adjusted R²</th></tr>
+      </thead>
+      <tbody>
+        {% for name, m in models.items() %}
+        <tr {% if name == best_model %}style="background: #eef6f0; font-weight: bold;"{% endif %}>
+          <td>{{ name }} {% if name == best_model %}<span class="badge badge-optimal">BEST</span>{% endif %}</td>
+          <td>{{ m.metrics.MAE }}</td>
+          <td>{{ m.metrics.MSE }}</td>
+          <td>{{ m.metrics.RMSE }}</td>
+          <td>{{ m.metrics.R2 }}</td>
+          <td>{{ m.metrics.Adj_R2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>4. Model Visualizations</h2>
+  <div class="chart-grid">
+    {% for p in plots %}
+    <div class="chart-card">
+      <h4>{{ p.title }}</h4>
+      <img src="{{ url_for('static', filename='regression_plots/' + p.file) }}" alt="{{ p.title }}">
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if feature_importances %}
+<section class="section">
+  <h2>5. Top Feature Importances (RandomForest)</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>Feature</th><th>Relative Importance</th></tr></thead>
+      <tbody>
+        {% for feat, imp in feature_importances.items() %}
+        <tr><td>{{ feat }}</td><td>{{ "%.4f" | format(imp) }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <h2>6. Key Findings</h2>
+  <ul class="findings-list">
+    {% for finding in findings %}
+    <li>{{ finding | safe }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="section">
+  <h2>7. Instant Single Observation Prediction</h2>
+  <p>Test the best regression pipeline ({{ best_model }}) interactively with live AJAX execution.</p>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <form id="reg-form" onsubmit="return false;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size:12px; font-weight:700;">Crop</label>
+            <select id="reg_crop" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for c in crops %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">State</label>
+            <select id="reg_state" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Season</label>
+            <select id="reg_season" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+              {% for se in seasons %}<option value="{{ se }}">{{ se }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Area (hectares)</label>
+            <input type="number" id="reg_area" value="5000" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Rainfall (mm)</label>
+            <input type="number" id="reg_rainfall" value="1200" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Fertilizer (kg)</label>
+            <input type="number" id="reg_fertilizer" value="450000" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Pesticide (kg)</label>
+            <input type="number" id="reg_pesticide" value="1500" step="any" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccd8cf;">
+          </div>
+        </div>
+        <button type="button" class="btn-predict" id="reg-btn" onclick="predictReg()" style="margin-top:16px;">Predict Yield</button>
+      </form>
+    </div>
+    <div class="summary-box" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <span style="font-size:14px; color:var(--text-muted); font-weight:600;">Predicted Crop Yield</span>
+      <div id="reg-result" style="font-size:36px; font-weight:800; color:var(--primary); margin:8px 0;">—</div>
+      <span style="font-size:12px; color:var(--text-muted);">Metric Tons per Hectare (t/ha)</span>
+      <p id="reg-error" style="color:red; display:none; margin-top:8px; font-size:12px;"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+async function predictReg() {
+  const btn = document.getElementById('reg-btn');
+  const res = document.getElementById('reg-result');
+  const err = document.getElementById('reg-error');
+  btn.disabled = true;
+  btn.textContent = 'Calculating...';
+  err.style.display = 'none';
+
+  const payload = {
+    crop: document.getElementById('reg_crop').value,
+    state: document.getElementById('reg_state').value,
+    season: document.getElementById('reg_season').value,
+    area: parseFloat(document.getElementById('reg_area').value),
+    annual_rainfall: parseFloat(document.getElementById('reg_rainfall').value),
+    fertilizer: parseFloat(document.getElementById('reg_fertilizer').value),
+    pesticide: parseFloat(document.getElementById('reg_pesticide').value),
+  };
+
+  try {
+    const resp = await fetch('/predict_regression', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      res.textContent = data.prediction.toFixed(4) + ' t/ha';
+    } else {
+      err.textContent = data.message || 'Prediction failed';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Network error: ' + e.message;
+    err.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Predict Yield';
+}
+</script>
+
+{% endif %}
+{% endblock %}

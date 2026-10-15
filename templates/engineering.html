@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}ML Engineering & Production Operations (CO6) · CropSense{% endblock %}
+
+{% block content %}
+<div class="header-card">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <span class="badge" style="background:#0f766e; color:#ccfbf1; font-weight:700;">COURSE OUTCOME 6 (CO6)</span>
+      <h1 style="margin:8px 0 4px 0;">MLOps: Feature Store, Serving Skew, REST API & Drift Monitoring</h1>
+      <p style="color:#64748b; margin:0;">
+        Production-grade Machine Learning Engineering lifecycle: Feature store registry with transformation parity, training-serving skew prevention, artifact packaging manifest, high-throughput REST endpoints, and drift detection (PSI).
+      </p>
+    </div>
+    <div>
+      <a href="{{ url_for('evaluation_page') }}" class="btn btn-secondary" style="text-decoration:none;">&larr; View Model Evaluation (CO5)</a>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1: SYSTEM HEALTH & METRIC SUMMARY -->
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:20px;">
+  <div class="card" style="padding:16px;">
+    <div style="font-size:11px; color:#64748b; font-weight:700;">DEPLOYED MODEL VERSION</div>
+    <div style="font-size:22px; font-weight:800; color:#0f766e; margin:4px 0;">{{ manifest.model_version }}</div>
+    <div style="font-size:12px; color:#64748b;">Serialized with Joblib / ONNX</div>
+  </div>
+  <div class="card" style="padding:16px;">
+    <div style="font-size:11px; color:#64748b; font-weight:700;">FEATURE STORE STATUS</div>
+    <div style="font-size:22px; font-weight:800; color:#2563eb; margin:4px 0;">{{ store_meta.features_registered }} Features Active</div>
+    <div style="font-size:12px; color:#64748b;">Online / Offline Zero Skew</div>
+  </div>
+  <div class="card" style="padding:16px;">
+    <div style="font-size:11px; color:#64748b; font-weight:700;">DRIFT MONITORING STATUS</div>
+    <div style="font-size:20px; font-weight:800; color:#dc2626; margin:4px 0;">Drift Alert (PSI > 0.25)</div>
+    <div style="font-size:12px; color:#dc2626;">Rainfall Shift Triggered</div>
+  </div>
+  <div class="card" style="padding:16px;">
+    <div style="font-size:11px; color:#64748b; font-weight:700;">REST SERVING LATENCY</div>
+    <div style="font-size:22px; font-weight:800; color:#16a34a; margin:4px 0;">&lt; 15 ms</div>
+    <div style="font-size:12px; color:#64748b;">P99 Latency SLA Compliant</div>
+  </div>
+</div>
+
+<!-- SECTION 2: FEATURE STORE & SKEW AVOIDANCE -->
+<div class="card" style="margin-top:24px;">
+  <div class="card-header">
+    <h3>1. Feature Store Registry & Training-Serving Skew Avoidance</h3>
+    <p style="color:#64748b; margin-top:4px;">
+      Centralized feature management guarantees identical mathematical feature transformations between training time (batch offline) and real-time inference (online REST endpoint).
+    </p>
+  </div>
+  
+  <div style="overflow-x:auto; margin-top:16px;">
+    <table class="table" style="font-size:13px;">
+      <thead>
+        <tr>
+          <th>Feature Name</th>
+          <th>Storage Type</th>
+          <th>Data Type</th>
+          <th>Transformation / Parity Logic</th>
+          <th>Skew Protection Guard</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for feat in features %}
+        <tr>
+          <td><code>{{ feat.name }}</code></td>
+          <td><span class="badge" style="background:#f1f5f9; color:#334155;">{{ feat.store_type }}</span></td>
+          <td>{{ feat.dtype }}</td>
+          <td>{{ feat.formula if feat.formula else feat.desc }}</td>
+          <td><span class="badge" style="background:#ecfdf5; color:#065f46;">Verified Parity</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  <div style="margin-top:16px; padding:14px; background:#eff6ff; border-radius:8px; border-left:4px solid #3b82f6; font-size:13px; color:#1e3a8a;">
+    <strong>How Training-Serving Skew is Avoided:</strong>
+    All online REST requests pass through <code>ml.feature_store.validate_and_transform_online_payload()</code>, which computes identical non-linear transformations (e.g. <code>Fertilizer / Area</code>, <code>log1p(Area)</code>) and validates feature distributions against historical training quantiles before feeding into the estimator.
+  </div>
+</div>
+
+<!-- SECTION 3: PRODUCTION MODEL PACKAGING & REGISTRY MANIFEST -->
+<div class="card" style="margin-top:24px;">
+  <div class="card-header">
+    <h3>2. Production Model Packaging & Metadata Registry</h3>
+    <p style="color:#64748b; margin-top:4px;">
+      Models are packaged as versioned, immutable artifacts accompanied by an explicit input/output contract manifest (<code>model_manifest.json</code>).
+    </p>
+  </div>
+  
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-top:16px;">
+    <div>
+      <h4>Model Metadata Card</h4>
+      <table class="table" style="font-size:13px; margin-top:8px;">
+        <tr><td><strong>Model Identifier:</strong></td><td>{{ manifest.model_name }}</td></tr>
+        <tr><td><strong>Version:</strong></td><td><span class="badge" style="background:#dbeafe; color:#1e40af;">{{ manifest.model_version }}</span></td></tr>
+        <tr><td><strong>Framework:</strong></td><td>{{ manifest.framework }}</td></tr>
+        <tr><td><strong>Serialization:</strong></td><td>{{ manifest.serialization_format }}</td></tr>
+        <tr><td><strong>Target Latency:</strong></td><td>&lt; 20 ms / request</td></tr>
+        <tr><td><strong>Retraining Trigger:</strong></td><td>PSI &ge; 0.25 on primary covariate</td></tr>
+      </table>
+    </div>
+    
+    <div>
+      <h4>Input / Output Schema Contract</h4>
+      <div style="background:#0f172a; color:#f8fafc; padding:14px; border-radius:8px; font-family:monospace; font-size:12px; max-height:220px; overflow-y:auto;">
+<pre style="margin:0; color:#38bdf8;">// Registered REST Input Contract
+{
+  "Crop": "string (e.g. 'Rice', 'Wheat')",
+  "Season": "string (e.g. 'Kharif', 'Rabi')",
+  "State": "string (e.g. 'Punjab')",
+  "Area": "float (hectares > 0.01)",
+  "Annual_Rainfall": "float (mm >= 0)",
+  "Fertilizer": "float (kg >= 0)",
+  "Pesticide": "float (kg >= 0)",
+  "Crop_Year": "int (optional, default current)"
+}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: DRIFT MONITORING (PSI) & DEGRADATION -->
+<div class="card" style="margin-top:24px;">
+  <div class="card-header">
+    <h3>3. Continuous Drift Monitoring & Performance Degradation (PSI)</h3>
+    <p style="color:#64748b; margin-top:4px;">
+      Statistical tracking using Population Stability Index (PSI) to detect covariate shift and concept drift before model degradation impacts downstream consumers.
+    </p>
+  </div>
+  
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-top:16px;">
+    <div style="text-align:center;">
+      <img src="{{ url_for('static', filename='monitoring_plots/data_drift_psi.png') }}" alt="Data Drift PSI" style="max-width:100%; border-radius:8px; border:1px solid #e2e8f0;">
+      <div style="font-size:12px; color:#64748b; margin-top:6px;"><strong>Feature PSI Drift:</strong> Baseline training vs real-time live inference distribution.</div>
+    </div>
+    <div style="text-align:center;">
+      <img src="{{ url_for('static', filename='monitoring_plots/performance_degradation.png') }}" alt="Performance Degradation" style="max-width:100%; border-radius:8px; border:1px solid #e2e8f0;">
+      <div style="font-size:12px; color:#64748b; margin-top:6px;"><strong>Degradation Curve:</strong> Model R² decline correlates with rising feature PSI over 6 months.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <h4>Live Feature Drift Scores</h4>
+    <table class="table" style="font-size:13px; margin-top:8px;">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>PSI Score</th>
+          <th>Threshold Status</th>
+          <th>MLOps Operational Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for feat, d in monitoring.drift_summary.items() %}
+        <tr>
+          <td><strong>{{ feat }}</strong></td>
+          <td><code>{{ d.psi_value }}</code></td>
+          <td>
+            {% if d.psi_value < 0.10 %}
+              <span class="badge" style="background:#d1fae5; color:#065f46;">{{ d.status }}</span>
+            {% elif d.psi_value < 0.25 %}
+              <span class="badge" style="background:#fef3c7; color:#92400e;">{{ d.status }}</span>
+            {% else %}
+              <span class="badge" style="background:#fee2e2; color:#991b1b;">{{ d.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if d.psi_value < 0.10 %}
+              Normal monitoring cadence
+            {% elif d.psi_value < 0.25 %}
+              Flag for investigation / feature importance review
+            {% else %}
+              <strong style="color:#b91c1c;">Trigger Automated Airflow / Kubeflow Retraining Pipeline</strong>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 5: INTERACTIVE PRODUCTION REST API TESTING CONSOLE -->
+<div class="card" style="margin-top:24px;">
+  <div class="card-header">
+    <h3>4. Interactive Production REST API Console (Microservice Endpoints)</h3>
+    <p style="color:#64748b; margin-top:4px;">
+      Test the live REST microservice endpoints directly from this dashboard.
+    </p>
+  </div>
+  
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-top:16px;">
+    <div>
+      <h4>REST Endpoints Catalog</h4>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+        <div style="padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+          <div><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">GET</span> <code>/api/v1/health</code></div>
+          <button onclick="testHealth()" class="btn btn-secondary" style="padding:4px 8px; font-size:12px;">Test Ping</button>
+        </div>
+        <div style="padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+          <div><span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">POST</span> <code>/api/v1/predict/yield</code></div>
+          <button onclick="testYield()" class="btn btn-secondary" style="padding:4px 8px; font-size:12px;">Send Payload</button>
+        </div>
+        <div style="padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+          <div><span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">POST</span> <code>/api/v1/predict/risk</code></div>
+          <button onclick="testRisk()" class="btn btn-secondary" style="padding:4px 8px; font-size:12px;">Send Payload</button>
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <h4>Live JSON Response Console</h4>
+      <div id="apiResponse" style="background:#0f172a; color:#38bdf8; padding:14px; border-radius:8px; font-family:monospace; font-size:12px; height:180px; overflow-y:auto; white-space:pre-wrap;">
+Click a button on the left to test the REST endpoints in real time...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function testHealth() {
+  const el = document.getElementById('apiResponse');
+  el.innerText = 'Calling GET /api/v1/health...';
+  try {
+    const res = await fetch('/api/v1/health');
+    const json = await res.json();
+    el.innerText = JSON.stringify(json, null, 2);
+  } catch (err) {
+    el.innerText = 'Error: ' + err;
+  }
+}
+
+async function testYield() {
+  const el = document.getElementById('apiResponse');
+  el.innerText = 'Calling POST /api/v1/predict/yield...';
+  const payload = {
+    Crop: "Rice",
+    Season: "Kharif",
+    State: "Punjab",
+    Area: 1200.0,
+    Annual_Rainfall: 1100.0,
+    Fertilizer: 85000.0,
+    Pesticide: 420.0,
+    Crop_Year: 2024
+  };
+  try {
+    const res = await fetch('/api/v1/predict/yield', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    el.innerText = JSON.stringify(json, null, 2);
+  } catch (err) {
+    el.innerText = 'Error: ' + err;
+  }
+}
+
+async function testRisk() {
+  const el = document.getElementById('apiResponse');
+  el.innerText = 'Calling POST /api/v1/predict/risk...';
+  const payload = {
+    Crop: "Wheat",
+    Season: "Rabi",
+    State: "Haryana",
+    Area: 800.0,
+    Annual_Rainfall: 520.0,
+    Fertilizer: 40000.0,
+    Pesticide: 210.0,
+    Crop_Year: 2024
+  };
+  try {
+    const res = await fetch('/api/v1/predict/risk', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    el.innerText = JSON.stringify(json, null, 2);
+  } catch (err) {
+    el.innerText = 'Error: ' + err;
+  }
+}
+</script>
+
+{% endblock %}

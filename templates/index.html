@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}CropSense Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">AGRICULTURAL ANALYTICS + MACHINE LEARNING</p>
+    <h1>CropSense</h1>
+    <p>Analyze agricultural crop productivity across India, explore multi-year weather & input patterns, compare regression and ensemble models, and forecast crop yield with operational underperformance risk alerts.</p>
+  </div>
+  <div class="sprout">🌾</div>
+</section>
+
+<div class="cards">
+{% for k,v in [
+  ('Total Records', summary.rows),
+  ('Features', summary.columns),
+  ('Unique Crops', summary.crops),
+  ('States Covered', summary.states),
+  ('Cropping Seasons', summary.seasons),
+  ('Underperformance Alerts', summary.underperformance_count),
+  ('Alert Rate', summary.underperformance_rate ~ '%'),
+  ('Median Yield', summary.median_yield ~ ' t/ha')
+] %}
+<div class="card"><span>{{k}}</span><strong>{{v}}</strong></div>
+{% endfor %}
+</div>
+
+<section class="panel">
+<h2>Project workflow</h2>
+<div class="workflow">
+  <div>1. Clean Crop Dataset</div>
+  <div>2. Engineer Agronomic Features</div>
+  <div>3. Perform Comprehensive EDA</div>
+  <div>4. Train Regression Models</div>
+  <div>5. Compare Ensemble Models</div>
+  <div>6. Live Yield Prediction</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>Model performance overview</h2>
+<div class="metrics">
+  <div><b>Yield Model R²</b><span>{{ metrics.yield.r2|round(3) if metrics and metrics.yield else '—' }}</span></div>
+  <div><b>Yield Model RMSE</b><span>{{ metrics.yield.rmse|round(2) if metrics and metrics.yield else '—' }} t/ha</span></div>
+  <div><b>Yield Model MAE</b><span>{{ metrics.yield.mae|round(2) if metrics and metrics.yield else '—' }} t/ha</span></div>
+  <div><b>Risk Alert Accuracy</b><span>{{ (metrics.risk.accuracy*100)|round(2) if metrics and metrics.risk else '—' }}%</span></div>
+  <div><b>Risk Alert F1 Score</b><span>{{ (metrics.risk.f1*100)|round(2) if metrics and metrics.risk else '—' }}%</span></div>
+</div>
+</section>
+
+<section class="cards">
+<a class="card link-card" href="{{ url_for('eda_page') }}">
+  <h2>EDA Dashboard</h2>
+  <p>Dataset information, descriptive statistics, outlier IQR detection, correlation heatmaps, and categorical rankings.</p>
+</a>
+<a class="card link-card" href="{{ url_for('regression_page') }}">
+  <h2>Regression Comparison</h2>
+  <p>Linear Regression, Ridge, and Random Forest comparison with leakage prevention and interactive predictions.</p>
+</a>
+<a class="card link-card" href="{{ url_for('ensemble_page') }}">
+  <h2>Ensemble Models</h2>
+  <p>Compare Random Forest, Decision Tree, AdaBoost, and XGBoost with actual vs predicted curves and residual analytics.</p>
+</a>
+<a class="card link-card" href="{{ url_for('unsupervised_page') }}">
+  <h2>Unsupervised &amp; Clusters (CO4)</h2>
+  <p>K-Means optimal clustering, Hierarchical Ward dendrogram, DBSCAN density outlier detection, and PCA/t-SNE dimensionality reduction.</p>
+</a>
+<a class="card link-card" href="{{ url_for('evaluation_page') }}">
+  <h2>Model Evaluation (CO5)</h2>
+  <p>5-Fold Cross-Validation, 3-way split, ROC-AUC, PR-AUC, probability calibration curves, and hyperparameter search comparison.</p>
+</a>
+<a class="card link-card" href="{{ url_for('predict_page') }}">
+  <h2>Live Prediction</h2>
+  <p>Enter crop type, state, season, area, rainfall, and fertilizer/pesticide dosage to forecast expected yield and risk status.</p>
+</a>
+</section>
+
+<section class="panel">
+<h2>About target leakage prevention & the underperformance alert</h2>
+<p>In agricultural forecasting, <b>Production</b> is the product of <code>Area × Yield</code>. Including Production as an input feature would create direct target leakage and render a model useless prior to harvest. CropSense therefore strictly isolates Production, predicting Yield solely from environmental conditions (rainfall), input dosages (fertilizer & pesticide), land scale, season, and geography.</p>
+<p>Furthermore, CropSense creates an operational <b>Underperformance Alert Flag</b> when seasonal rainfall (>800 mm) and fertilization are ample, yet realized harvest yield falls into the lowest quartile for that specific crop, providing early warning for pest outbreaks or localized crop stress.</p>
+</section>
+{% endblock %}

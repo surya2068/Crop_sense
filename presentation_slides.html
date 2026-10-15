@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CropSense Presentation Slides</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .deck-container { width: 100%; max-width: 960px; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid #334155; }
+  .slide { display: none; padding: 48px; min-height: 540px; flex-direction: column; justify-content: space-between; }
+  .slide.active { display: flex; }
+  .slide-header { border-bottom: 2px solid #3b82f6; padding-bottom: 16px; margin-bottom: 24px; }
+  .badge { display: inline-block; background: #2563eb; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; text-transform: uppercase; }
+  h1 { font-size: 32px; color: #f8fafc; }
+  h2 { font-size: 24px; color: #60a5fa; margin-bottom: 12px; }
+  .content-box { background: #0f172a; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 16px; }
+  .why-box { background: #172554; padding: 20px; border-radius: 8px; border-left: 4px solid #38bdf8; margin-bottom: 16px; }
+  p, li { font-size: 16px; line-height: 1.6; color: #cbd5e1; }
+  ul { margin-left: 20px; margin-top: 8px; }
+  li { margin-bottom: 6px; }
+  .highlight { color: #34d399; font-weight: bold; }
+  .formula { font-family: 'Courier New', monospace; background: #020617; padding: 4px 8px; border-radius: 4px; color: #fbbf24; font-weight: bold; }
+  .controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: #0f172a; border-top: 1px solid #334155; }
+  .btn { background: #2563eb; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+  .btn:hover { background: #1d4ed8; }
+  .btn:disabled { background: #475569; cursor: not-allowed; }
+  .slide-num { font-size: 14px; color: #94a3b8; font-weight: 600; }
+  .print-btn { background: #059669; }
+  .print-btn:hover { background: #047857; }
+</style>
+</head>
+<body>
+
+<div class="deck-container">
+
+  <!-- SLIDE 1 -->
+  <div class="slide active">
+    <div>
+      <span class="badge">Machine Learning Final Project</span>
+      <h1 style="font-size:38px; margin-top:12px; color:#38bdf8;">🌱 CropSense</h1>
+      <h2 style="font-size:22px; color:#94a3b8; margin-top:6px;">Agricultural Crop Yield Prediction & ML Analytics Dashboard</h2>
+      <div style="margin-top:40px; padding:20px; background:#0f172a; border-radius:8px; border:1px solid #334155;">
+        <p><strong>Covering:</strong> Course Outcomes CO1, CO2, CO3, CO4, and CO5</p>
+        <p style="margin-top:6px;"><strong>Domain:</strong> Supervised Regression, Ensembles, Unsupervised Clustering & Validation</p>
+        <p style="margin-top:6px;"><strong>Target:</strong> Pre-harvest agricultural yield forecasting & risk evaluation</p>
+      </div>
+    </div>
+    <div style="color:#64748b; font-size:13px;">Use the Next / Previous buttons below or arrow keys to navigate.</div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">Problem Statement</span>
+      <h1>Why This Project Was Needed</h1>
+    </div>
+    <div class="content-box">
+      <h2>The Farming Problem:</h2>
+      <p>Farmers in India suffer crop losses due to erratic rainfall and wrong chemical dosages. They need to know their expected yield <strong>before harvest</strong> so they can plan loans, storage, and prices.</p>
+    </div>
+    <div class="why-box">
+      <h2>The Major Machine Learning Mistake (Target Leakage):</h2>
+      <p>Many student projects use <span class="formula">Production</span> to predict <span class="formula">Yield</span>. But mathematically:</p>
+      <p style="margin:8px 0;"><span class="formula">Yield = Production / Area</span></p>
+      <p>If you already know total production, you don't need machine learning! That is called <strong>Target Leakage</strong>. We completely removed 'Production' so the model predicts yield before harvest!</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO1: Data Preparation</span>
+      <h1>Dataset & Feature Engineering</h1>
+    </div>
+    <div class="content-box">
+      <h2>Dataset Overview:</h2>
+      <ul>
+        <li>Indian Ministry of Agriculture official dataset (1997–2020)</li>
+        <li><strong>19,689 total agricultural records</strong> across <strong>55 crops</strong> and <strong>30 states</strong></li>
+        <li>Features: Crop, State, Season, Area, Annual Rainfall, Fertilizer, Pesticide, Crop Year</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why We Engineered 'Fertilizer per Area':</h2>
+      <p>A small 2-hectare family farm and a 500-hectare commercial farm use very different total amounts of fertilizer. We calculated <span class="formula">Fertilizer / Area (kg/ha)</span> to compare all farms fairly on an equal scale.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO1: Operational Alert</span>
+      <h1>The Underperformance Risk Alert</h1>
+    </div>
+    <div class="content-box">
+      <h2>What is the Underperformance Flag?</h2>
+      <p>It is an automatic early-warning flag (1 or 0) that triggers when:</p>
+      <ul>
+        <li>Rainfall is ample (> 800 mm)</li>
+        <li>Fertilizer is properly applied (> 20 kg/ha)</li>
+        <li><strong>BUT</strong> realized yield collapses to less than 50% of normal for that crop</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why is it used in real life?</h2>
+      <p>When weather and fertilizer are good but yield is still low, it alerts farmers to <strong>hidden pest attacks, disease, or bad seed quality</strong> early before complete financial ruin occurs.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO1: Exploratory Analysis</span>
+      <h1>Exploratory Data Analysis (EDA)</h1>
+    </div>
+    <div class="content-box">
+      <h2>What We Analyzed:</h2>
+      <ul>
+        <li><strong>Missing Values:</strong> Verified 0 missing values after cleaning.</li>
+        <li><strong>Correlation Heatmap:</strong> Analyzed non-linear relationships between weather inputs and crop yields.</li>
+        <li><strong>Outlier Audits:</strong> Used Interquartile Range (IQR) boxplots to inspect farm sizes and fertilizer dosages.</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why Outlier Audits Are Important:</h2>
+      <p>Agricultural data is heavily right-skewed. Using log transformations and IQR checks prevents giant commercial farms from distorting the models for smaller farmers.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO2: Supervised Learning</span>
+      <h1>Linear Models & Regularization</h1>
+    </div>
+    <div class="content-box">
+      <h2>Models Compared:</h2>
+      <ul>
+        <li><strong>Linear Regression (OLS):</strong> Basic straight-line mathematical baseline.</li>
+        <li><strong>Ridge Regression (L2):</strong> Shrinks weights smoothly to prevent features from interfering with each other.</li>
+        <li><strong>Lasso Regression (L1):</strong> Sets useless feature weights to exact zero (automatic feature selection).</li>
+        <li><strong>ElasticNet:</strong> Balanced combination of both L1 and L2 penalties.</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why Regularization is Used:</h2>
+      <p>It solves the <strong>Bias-Variance trade-off</strong>. Unregularized models easily overfit noisy weather records, while Ridge and Lasso produce stable, reliable predictions.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO3: Ensemble Learning</span>
+      <h1>Tree-Based Ensemble Models</h1>
+    </div>
+    <div class="content-box">
+      <h2>Bagging vs. Boosting Architectures:</h2>
+      <ul>
+        <li><strong>Decision Tree:</strong> Single tree (fast, but high variance/overfitting).</li>
+        <li><strong>Random Forest (Bagging):</strong> Trains many independent trees in parallel to reduce variance.</li>
+        <li><strong>AdaBoost & XGBoost (Boosting):</strong> Trains sequential shallow trees where each tree fixes errors from the previous tree.</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why Tree Ensembles Outperform Linear Models:</h2>
+      <p>Farming biology is <strong>non-linear</strong>. Adding more fertilizer helps only up to a point, after which it burns the crop. Tree ensembles capture these biological limits much better than straight lines.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO4: Unsupervised Learning</span>
+      <h1>Clustering & Dimensionality Reduction</h1>
+    </div>
+    <div class="content-box">
+      <h2>Unsupervised Techniques Used (No Labels):</h2>
+      <ul>
+        <li><strong>PCA:</strong> Scree plot shows the first 2 principal components capture dominant weather and farm scale variance.</li>
+        <li><strong>K-Means Clustering:</strong> Elbow method identified optimal <span class="formula">k = 4</span> clusters.</li>
+        <li><strong>DBSCAN:</strong> Density-based clustering automatically detected abnormal recording errors and extreme climate noise points.</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why It is Used:</h2>
+      <p>It proves the dataset naturally separates into <strong>4 distinct farming styles in India</strong>: (1) Arid subsistence, (2) Irrigated cash crops, (3) Commercial plantations, and (4) Monsoon rainfed staples.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 9 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">CO5: Evaluation & Validation</span>
+      <h1>Model Evaluation & Validation</h1>
+    </div>
+    <div class="content-box">
+      <h2>Our Academic Evaluation Protocol:</h2>
+      <ul>
+        <li><strong>3-Way Split:</strong> 70% Train, 15% Validation, 15% Holdout Test to prevent hyperparameter leakage.</li>
+        <li><strong>5-Fold Cross Validation:</strong> Proves consistent high stability across all data slices with average <span class="formula">R² = 0.988</span>.</li>
+        <li><strong>ROC-AUC (0.764) & PR-AUC (0.447):</strong> Measures risk classification on imbalanced rare failure events.</li>
+        <li><strong>Brier Score (0.091):</strong> Reliability diagram verifies predicted probability percentages match true empirical frequencies.</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Why We Benchmark Hyperparameter Search:</h2>
+      <p>Bayesian Optimization reached the highest validation score in only 30 iterations and <strong>4.6 seconds</strong>—which is <strong>4 times faster</strong> than exhaustive Grid Search!</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 10 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">Live Demonstration</span>
+      <h1>Real-Time Prediction & Defensive Bounds</h1>
+    </div>
+    <div class="content-box">
+      <h2>1. Regional State Variation (Live Demo):</h2>
+      <p>For the exact same inputs (Bajra, Kharif, 1000 ha, 1000 mm rainfall):</p>
+      <ul>
+        <li><strong>Bihar:</strong> Predicted Yield = <span class="highlight">0.965 t/ha</span></li>
+        <li><strong>Tamil Nadu:</strong> Predicted Yield = <span class="highlight">1.965 t/ha</span></li>
+      </ul>
+      <p><strong>Why:</strong> Accurately reflects Tamil Nadu's high-yield hybrid seeds and regional irrigation differences.</p>
+    </div>
+    <div class="why-box">
+      <h2>2. Defensive Agricultural Validation:</h2>
+      <p>The system immediately rejects negative rainfall (-500) and blocks toxic chemical application rates (> 6,000 kg/ha) with clear error alerts, protecting the model from bad input.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 11 -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="badge">Conclusion</span>
+      <h1>Summary & Final Takeaways</h1>
+    </div>
+    <div class="content-box">
+      <h2>What We Achieved:</h2>
+      <ul>
+        <li>Solved the critical <strong>Target Leakage</strong> problem for genuine pre-harvest forecasting.</li>
+        <li>Implemented full supervised regression (CO2), tree ensembles (CO3), unsupervised clustering (CO4), and validation (CO5).</li>
+        <li>Built an interactive, production-ready web application with high generalizability (R² = 0.988).</li>
+      </ul>
+    </div>
+    <div class="why-box">
+      <h2>Future Enhancements:</h2>
+      <p>Connecting live satellite vegetation index (NDVI) images and IoT soil moisture sensors for automated real-time farm advisory.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAVIGATION CONTROLS -->
+<div style="width:100%; max-width:960px; margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+  <button id="prevBtn" class="btn" onclick="prevSlide()">&#8592; Previous Slide</button>
+  <span id="slideCounter" class="slide-num">Slide 1 of 11</span>
+  <button id="nextBtn" class="btn" onclick="nextSlide()">Next Slide &#8594;</button>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('slideCounter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function updateSlide() {
+    slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === currentSlide);
+    });
+    counter.innerText = `Slide ${currentSlide + 1} of ${slides.length}`;
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === slides.length - 1;
+  }
+
+  function nextSlide() {
+    if (currentSlide < slides.length - 1) {
+      currentSlide++;
+      updateSlide();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateSlide();
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+
+  updateSlide();
+</script>
+
+</body>
+</html>

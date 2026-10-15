@@ -1,0 +1,221 @@
+{
+  "drift_summary": {
+    "Annual_Rainfall": {
+      "psi_value": 0.3524,
+      "status": "Critical (Severe Drift Detected - Retrain Model)",
+      "badge_class": "danger",
+      "bucket_edges": [
+        301.3,
+        715.6,
+        902.5,
+        1021.6,
+        1117.7,
+        1220.5,
+        1321.0,
+        1496.6,
+        1912.1,
+        2664.8,
+        6552.7
+      ],
+      "expected_pct": [
+        9.87,
+        10.1,
+        9.82,
+        9.86,
+        10.22,
+        9.9,
+        10.13,
+        10.08,
+        9.9,
+        10.12
+      ],
+      "actual_pct": [
+        9.57,
+        9.67,
+        6.5,
+        5.64,
+        5.49,
+        3.64,
+        8.13,
+        26.22,
+        18.28,
+        6.86
+      ]
+    },
+    "Fertilizer": {
+      "psi_value": 0.0923,
+      "status": "Healthy (No Significant Shift)",
+      "badge_class": "success",
+      "bucket_edges": [
+        54.17,
+        35934.37,
+        140704.61,
+        352043.74,
+        747595.63,
+        1475784.96,
+        3253111.52,
+        7779690.48,
+        16748202.5,
+        48078290.34,
+        1754788960.0
+      ],
+      "expected_pct": [
+        10.01,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.01
+      ],
+      "actual_pct": [
+        17.24,
+        12.97,
+        11.72,
+        10.5,
+        8.86,
+        9.38,
+        8.35,
+        5.62,
+        7.86,
+        7.52
+      ]
+    },
+    "Area": {
+      "psi_value": 0.0538,
+      "status": "Healthy (No Significant Shift)",
+      "badge_class": "success",
+      "bucket_edges": [
+        0.5,
+        276.2,
+        1027.0,
+        2592.3,
+        5557.4,
+        11095.0,
+        24357.2,
+        58187.7,
+        129796.4,
+        374823.5,
+        10216517.0
+      ],
+      "expected_pct": [
+        10.01,
+        9.99,
+        10.01,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.01
+      ],
+      "actual_pct": [
+        15.98,
+        10.82,
+        11.5,
+        10.33,
+        9.06,
+        9.48,
+        9.5,
+        6.67,
+        7.48,
+        9.18
+      ]
+    },
+    "Yield": {
+      "psi_value": 0.0352,
+      "status": "Healthy (No Significant Shift)",
+      "badge_class": "success",
+      "bucket_edges": [
+        -0.0,
+        0.33,
+        0.5,
+        0.64,
+        0.83,
+        1.02,
+        1.34,
+        1.84,
+        2.93,
+        8.81,
+        16935.06
+      ],
+      "expected_pct": [
+        9.98,
+        10.02,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.01
+      ],
+      "actual_pct": [
+        6.91,
+        7.81,
+        10.23,
+        13.78,
+        10.43,
+        8.91,
+        8.97,
+        10.77,
+        10.45,
+        11.75
+      ]
+    }
+  },
+  "monthly_tracking": [
+    {
+      "month": "May 2026",
+      "r2": 0.924,
+      "rmse": 9.85,
+      "psi": 0.032,
+      "requests": 14200
+    },
+    {
+      "month": "Jun 2026",
+      "r2": 0.918,
+      "rmse": 10.12,
+      "psi": 0.048,
+      "requests": 18500
+    },
+    {
+      "month": "Jul 2026",
+      "r2": 0.91,
+      "rmse": 10.6,
+      "psi": 0.081,
+      "requests": 23100
+    },
+    {
+      "month": "Aug 2026",
+      "r2": 0.895,
+      "rmse": 11.45,
+      "psi": 0.125,
+      "requests": 27400
+    },
+    {
+      "month": "Sep 2026",
+      "r2": 0.871,
+      "rmse": 12.8,
+      "psi": 0.198,
+      "requests": 31000
+    },
+    {
+      "month": "Oct 2026",
+      "r2": 0.852,
+      "rmse": 13.92,
+      "psi": 0.284,
+      "requests": 35800
+    }
+  ],
+  "system_status": {
+    "overall_health": "Degradation Alert (Drift Triggered)",
+    "retraining_recommended": true,
+    "last_evaluated": "2026-10-11T17:45:00Z"
+  }
+}

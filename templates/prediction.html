@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}CropSense - Agricultural Prediction{% endblock %}
+{% block content %}
+<h1>CropSense Live Agricultural Prediction</h1>
+<p>Input agricultural parameters to predict expected crop yield (t/ha) and evaluate operational underperformance risk.</p>
+
+<form method="post" class="form-grid">
+  <label>Crop Type
+    <select name="crop" required>
+      {% for c in crops %}
+      <option value="{{ c }}" {% if selected and selected.crop == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>State / Region
+    <select name="state" required>
+      {% for s in states %}
+      <option value="{{ s }}" {% if selected and selected.state == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>Cropping Season
+    <select name="season" required>
+      {% for se in seasons %}
+      <option value="{{ se }}" {% if selected and selected.season == se %}selected{% endif %}>{{ se }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>Cultivated Area (Hectares)
+    <span style="font-size:11px; color:#64748b; font-weight:normal;">Allowed: 0.1 to 10,000,000 ha</span>
+    <input name="area" type="number" step="any" min="0.1" max="10000000" placeholder="e.g. 500" value="{{ selected.area if selected else '10000' }}" required>
+  </label>
+
+  <label>Annual Rainfall (mm)
+    <span style="font-size:11px; color:#64748b; font-weight:normal;">Allowed: 50 to 7,000 mm</span>
+    <input name="annual_rainfall" type="number" step="any" min="50" max="7000" placeholder="e.g. 1100" value="{{ selected.annual_rainfall if selected else '1200' }}" required>
+  </label>
+
+  <label>Total Fertilizer Used (kg)
+    <span style="font-size:11px; color:#64748b; font-weight:normal;">Allowed: 0 to 5,000,000,000 kg</span>
+    <input name="fertilizer" type="number" step="any" min="0" max="5000000000" placeholder="e.g. 80000" value="{{ selected.fertilizer if selected else '1500000' }}" required>
+  </label>
+
+  <label>Total Pesticide Used (kg)
+    <span style="font-size:11px; color:#64748b; font-weight:normal;">Allowed: 0 to 20,000,000 kg</span>
+    <input name="pesticide" type="number" step="any" min="0" max="20000000" placeholder="e.g. 350" value="{{ selected.pesticide if selected else '3000' }}" required>
+  </label>
+
+  <label>Crop Year
+    <span style="font-size:11px; color:#64748b; font-weight:normal;">Allowed: 1990 to 2035</span>
+    <input name="crop_year" type="number" min="1990" max="2035" placeholder="e.g. 2024" value="{{ selected.crop_year if selected else '2022' }}" required>
+  </label>
+
+  <button type="submit">Run CropSense Prediction</button>
+</form>
+
+{% if error %}
+<div class="alert">{{ error }}</div>
+{% endif %}
+
+{% if result %}
+<div class="result">
+  <h2>CropSense Prediction Result</h2>
+  <div class="result-grid">
+    <div>
+      <span>Predicted Crop Yield</span>
+      <strong>{{ result.yield }} t/ha</strong>
+    </div>
+    <div>
+      <span>Underperformance Alert</span>
+      <strong>
+        {% if result.underperformance %}
+        <span style="color:#dc2626;">ELEVATED RISK</span>
+        {% else %}
+        <span style="color:#16a34a;">OPTIMAL CONDITION</span>
+        {% endif %}
+      </strong>
+    </div>
+    <div>
+      <span>Yield Risk Probability</span>
+      <strong>{{ result.risk_probability }}%</strong>
+    </div>
+    <div>
+      <span>Est. Total Production</span>
+      <strong>{{ result.estimated_production }} tons</strong>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
